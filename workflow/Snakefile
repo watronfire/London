@@ -2,10 +2,14 @@ LINEAGE_CALLS = "data/test.lineages.tsv"
 TEST_SEQUENCES = "data/test.sequences.vcf"
 REFERENCE = "data/cholera_reference.fasta"
 
+# Number of sequences to subsample for speed test.
+SPEED_BENCHMARKS = [1,10,25,50,75,100]
+
 rule all:
     input:
-        benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=[1,10,50,100], trial=range(3) ),
-        benchmark_summary = "results/benchmark-summary.csv"
+        benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=SPEED_BENCHMARKS, trial=range(3) ),
+        benchmark_summary = "results/benchmark-summary.csv",
+        benchmark_plot = "results/plots/speed-memory-benchmark.pdf"
 
 
 rule prepare_VCF:
@@ -62,11 +66,58 @@ rule benchmark_vibecheck_speed:
 
 rule combine_speed_benchmark:
     input:
-        benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=[1,10,50,100], trial=range(3) )
+        benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=SPEED_BENCHMARKS, trial=range(3) )
     output:
-        benchmark_summary = "results/benchmark-summary.csv"
-    shell:
-        """
-        cat {input.benchmarks} > {output.benchmark_summary}
-        """
+        benchmark_summary = "results/benchmark-summary.csv",
+        benchmark_plot = "results/plots/speed-memory-benchmark.pdf"
+    run:
+        import pandas as pd
+        import numpy as np
+        import matplotlib.pyplot as plt
 
+        res = list()
+        for file in input.benchmarks:
+            df = pd.read_csv( file,sep='\t' )
+            df["file"] = os.path.basename( file )
+            res.append( df )
+
+        res = pd.concat( res )
+        res[["sequences", "trial"]] = res["file"].str.extract( r"sample(\d+)-trail(\d+).tsv" )
+        res["sequences"] = pd.to_numeric( res["sequences"] )
+        res["trial"] = pd.to_numeric( res["trial"] )
+        res = res.drop( columns=["file"] )
+        res.to_csv( output.benchmark_summary, index=False )
+
+        fig, ax = plt.subplots( dpi=200,figsize=(12, 3.5),ncols=3, sharex=True )
+
+        jitter = (np.random.random( len( res ) ) * 4) - 2
+        points = ax[0].scatter( res["sequences"] + jitter,res["cpu_time"],s=10,zorder=100,c="#009E73" )
+        points.set_clip_on( False )
+        ax[0].set_ylim( 0 )
+        ax[0].set_xlim( -3,103 )
+        ax[0].set_xlabel( "Sequences",fontweight="bold" )
+        ax[0].set_ylabel( "CPU time (seconds)",fontweight="bold" )
+        ax[0].grid( color="#EFEFEF" )
+
+        points = ax[1].scatter(
+            res["sequences"] + jitter,res["cpu_time"] / res["sequences"],s=10,zorder=100,c="#009E73"
+            )
+        points.set_clip_on( False )
+
+        ax[1].set_ylim( 0 )
+        ax[1].set_xlabel( "Sequences",fontweight="bold" )
+        ax[1].set_ylabel( "CPU time per sequence (seconds)",fontweight="bold" )
+
+        ax[1].grid( color="#EFEFEF" )
+
+        points = ax[2].scatter( res["sequences"] + jitter,res["max_rss"],s=10,zorder=100,c="#009E73" )
+        points.set_clip_on( False )
+
+        ax[2].set_ylim( 0 )
+        ax[2].set_xlabel( "Sequences",fontweight="bold" )
+        ax[2].set_ylabel( "Max memory (MB)",fontweight="bold" )
+
+        ax[2].grid( color="#EFEFEF" )
+
+        plt.tight_layout()
+        plt.savefig( output.benchmark_plot )
