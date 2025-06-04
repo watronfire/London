@@ -9,8 +9,8 @@ rule all:
     input:
         benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=SPEED_BENCHMARKS, trial=range(3) ),
         benchmark_summary = "results/benchmark-summary.csv",
-        benchmark_plot = "results/plots/speed-memory-benchmark.pdf"
-
+        benchmark_plot = "results/plots/speed-memory-benchmark.pdf",
+        accuracy_lineage_calls = "intermediates/accuracy_runs/lineage_report.csv"
 
 rule prepare_VCF:
     input:
@@ -45,6 +45,7 @@ rule subsample_sequences:
         sequences = rules.prepare_raw_sequences.output.raw_sequences
     output:
         subsampled_sequences = "intermediates/subsamples/sample{sample}-trail{trial}.fasta"
+    group: "benchmark"
     shell:
         """
         seqtk sample {input.sequences} {wildcards.sample} > {output.subsampled_sequences}
@@ -58,6 +59,7 @@ rule benchmark_vibecheck_speed:
     output:
         lineage_call = "intermediates/speed_runs/sample{sample}-trail{trial}/lineage_report.csv"
     benchmark: "intermediates/benchmarks/sample{sample}-trail{trial}.tsv"
+    group: "benchmark"
     shell:
         """
         vibecheck --outdir {params.outdir} {input.subsampled_sequences}
@@ -121,3 +123,17 @@ rule combine_speed_benchmark:
 
         plt.tight_layout()
         plt.savefig( output.benchmark_plot )
+
+
+rule classify_all_sequences:
+    input:
+        sequences = rules.prepare_raw_sequences.output.raw_sequences
+    params:
+        outdir = "intermediates/accuracy_runs/"
+    output:
+        lineage_call = "intermediates/accuracy_runs/lineage_report.csv"
+    threads: 4
+    shell:
+        """
+        vibecheck --outdir {params.outdir} {input.sequences}
+        """
