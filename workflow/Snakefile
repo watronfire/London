@@ -1,0 +1,72 @@
+LINEAGE_CALLS = "data/test.lineages.tsv"
+TEST_SEQUENCES = "data/test.sequences.vcf"
+REFERENCE = "data/cholera_reference.fasta"
+
+rule all:
+    input:
+        benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=[1,10,50,100], trial=range(3) ),
+        benchmark_summary = "results/benchmark-summary.csv"
+
+
+rule prepare_VCF:
+    input:
+        sequences = TEST_SEQUENCES
+    output:
+        compressed_sequences = "intermediates/sequences.bcf.gz",
+        sequences_index = "intermediates/sequecnes.bcg.gz.csi"
+    shell:
+        """
+        bcftools view -Ob {input.sequences} > {output.compressed_sequences} &&
+        bcftools index {output.compressed_sequences}
+        """
+
+rule prepare_raw_sequences:
+    input:
+        sequences = rules.prepare_VCF.output.compressed_sequences,
+        reference = REFERENCE
+    params:
+        script = "workflow/scripts/vcf_to_fasta.py"
+    output:
+        raw_sequences = "intermediates/raw_sequences.fasta"
+    shell:
+        """
+        python {params.script} \
+            --reference={input.reference} \
+            --vcf {input.sequences} \
+            --output={output.raw_sequences}
+        """
+
+rule subsample_sequences:
+    input:
+        sequences = rules.prepare_raw_sequences.output.raw_sequences
+    output:
+        subsampled_sequences = "intermediates/subsamples/sample{sample}-trail{trial}.fasta"
+    shell:
+        """
+        seqtk sample {input.sequences} {wildcards.sample} > {output.subsampled_sequences}
+        """
+
+rule benchmark_vibecheck_speed:
+    input:
+        subsampled_sequences = rules.subsample_sequences.output.subsampled_sequences
+    params:
+        outdir = "intermediates/speed_runs/sample{sample}-trail{trial}/"
+    output:
+        lineage_call = "intermediates/speed_runs/sample{sample}-trail{trial}/lineage_report.csv"
+    benchmark: "intermediates/benchmarks/sample{sample}-trail{trial}.tsv"
+    shell:
+        """
+        vibecheck --outdir {params.outdir} {input.subsampled_sequences}
+        """
+
+
+rule combine_speed_benchmark:
+    input:
+        benchmarks = expand( "intermediates/benchmarks/sample{sample}-trail{trial}.tsv", sample=[1,10,50,100], trial=range(3) )
+    output:
+        benchmark_summary = "results/benchmark-summary.csv"
+    shell:
+        """
+        cat {input.benchmarks} > {output.benchmark_summary}
+        """
+
