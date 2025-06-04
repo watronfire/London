@@ -135,5 +135,5 @@ rule classify_all_sequences:
     threads: 4
     shell:
         """
-        vibecheck --outdir {params.outdir} {input.sequences}
+        vibecheck --threads {threads} --outdir {params.outdir} {input.sequences}
         """
