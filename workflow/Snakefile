@@ -13,7 +13,7 @@ rule prepare_VCF:
         sequences = TEST_SEQUENCES
     output:
         compressed_sequences = "intermediates/sequences.bcf.gz",
-        sequences_index = "intermediates/sequecnes.bcg.gz.csi"
+        sequences_index = "intermediates/sequences.bcf.gz.csi"
     shell:
         """
         bcftools view -Ob {input.sequences} > {output.compressed_sequences} &&
