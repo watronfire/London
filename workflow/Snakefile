@@ -149,6 +149,8 @@ rule plot_classification_stats:
         parsimony_plot = "results/plots/parsimoneous-placements.pdf"
     run:
         import pandas as pd
+        import matplotlib.pyplot as plt
+        import matplotlib.ticker as mticker
         from statsmodels.stats.proportion import proportion_confint
 
         actual = pd.read_csv( input.actual_lineages,sep="\t" )
