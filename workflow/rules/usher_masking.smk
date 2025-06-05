@@ -55,7 +55,7 @@ rule run_vibecheck_usher_masked:
             --outdir {params.outdir} \
             --outfile {wildcards.sample}_{wildcards.freq}.csv \
             --threads {threads} \
-            --max-ambiguity 1
+            --max-ambiguity 1 \
             {input.sequences} 
         """
 
