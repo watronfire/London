@@ -7,11 +7,6 @@ REFERENCE = "data/cholera_reference.fasta"
 TREE = "/PHShome/nm104/analysis/2025.01.15_class/pruned.pb"
 FREQUENCIES = range(5,100,5)
 
-rule all:
-    input:
-        usher_results = expand( "intermediates/usher_parsed/{sample}_{freq}.csv", sample=CANDIDATES, freq=FREQUENCIES ),
-        results = "results/trials.csv"
-
 rule extract_sequence:
     input:
         vcf = rules.prepare_VCF.output.compressed_sequences,
