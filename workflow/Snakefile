@@ -12,3 +12,4 @@ rule all:
         masking_results = "results/usher-masking.csv"
 
 include: "rules/benchmarks.smk"
+include: "rules/usher_masking.smk"
