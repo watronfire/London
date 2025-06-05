@@ -8,6 +8,7 @@ rule all:
         benchmark_plot = "results/plots/speed-memory-benchmark.pdf",
         accuracy_lineage_calls = "intermediates/accuracy_runs/lineage_report.csv",
         accuracy_plot= "results/plots/accuracy-confusion-matrix.pdf",
-        parsimony_plot= "results/plots/parsimoneous-placements.pdf"
+        parsimony_plot= "results/plots/parsimoneous-placements.pdf",
+        masking_results = "results/usher-masking.csv"
 
 include: "rules/benchmarks.smk"
