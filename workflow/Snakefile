@@ -199,25 +199,25 @@ rule plot_classification_stats:
 
         points = ax[0].scatter( accuracy_sum.index,accuracy_sum["accuracy"],color="#009E73",zorder=100 )
         points.set_clip_on( False )
-        points = ax[0].scatter( lineages + 1,accuracy,color="#009E73",zorder=100 )
+        points = ax[0].scatter( lineages,accuracy,color="#009E73",zorder=100 )
         points.set_clip_on( False )
 
         ax[0].vlines(
             accuracy_sum.index,
             accuracy_sum["accuracy_low"],accuracy_sum["accuracy_high"],color="#009E73",capstyle="round"
         )
-        ax[0].vlines( lineages + 1,ci[0],ci[1],color="#009E73",zorder=100 )
+        ax[0].vlines( lineages,ci[0],ci[1],color="#009E73",zorder=100 )
 
         ax[0].set_xticks(
-            range( lineages + 2 ),
+            range( lineages + 1 ),
             accuracy_sum["lineage_actual"].replace( { "UNDEFINED": "Other" } ).to_list() + ["All"],fontsize=7
             )
         ax[0].yaxis.set_major_formatter( mticker.PercentFormatter( 1 ) )
 
         ax[0].set_ylim( 0,1 )
-        ax[0].set_xlim( -0.5,lineages + 1.5 )
+        ax[0].set_xlim( -0.5,lineages + 0.5 )
 
-        ax[0].axvline( lineages + 0.5,color="black",linewidth=1,linestyle="dashed" )
+        ax[0].axvline( lineages - 0.5,color="black",linewidth=0.75 )
 
         ax[0].set_ylabel( "Accuracy",fontweight="bold" )
 
