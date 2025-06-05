@@ -195,7 +195,7 @@ rule plot_classification_stats:
 
         fig, ax = plt.subplots( dpi=200,figsize=(10, 4),ncols=2 )
 
-        lineages = accuracy_sum.index[0]
+        lineages = accuracy_sum.shape[0]
 
         points = ax[0].scatter( accuracy_sum.index,accuracy_sum["accuracy"],color="#009E73",zorder=100 )
         points.set_clip_on( False )
