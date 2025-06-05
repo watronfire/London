@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-candidates = pd.read_csv( "candidates.csv" )
+candidates = pd.read_csv( "data/candidates.csv" )
 CANDIDATES = candidates.set_index( "id" )["sequence_id"].to_dict()
 REFERENCE = "data/cholera_reference.fasta"
 TREE = "/PHShome/nm104/analysis/2025.01.15_class/pruned.pb"
