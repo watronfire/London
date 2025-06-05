@@ -51,7 +51,11 @@ rule run_vibecheck_usher_masked:
     threads: 8
     shell:
         """
-        vibecheck --outdir {params.outdir} --outfile {wildcards.sample}_{wildcards.freq}.csv {input.sequences}
+        vibecheck \
+            --outdir {params.outdir} \
+            --outfile {wildcards.sample}_{wildcards.freq}.csv \ 
+            --threads {threads}
+            {input.sequences} 
         """
 
 
