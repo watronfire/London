@@ -85,7 +85,7 @@ rule combine_results:
 
 rule plot_masking_results:
     input:
-        results = rules.combine_results.output.combined_results
+        results = rules.combine_results.output.results
     output:
         accuracy_plot = "results/plots/accuracy-vs-masking.pdf",
         parsimony_plot = "results/plots/parsimony-vs-masking.pdf"
