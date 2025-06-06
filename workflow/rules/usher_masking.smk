@@ -62,8 +62,8 @@ rule run_vibecheck_usher_masked:
 
 rule mask_variants_usher:
     input:
-        sequences = TEST_SEQUENCES,
-        canidates = "data/candidates.csv"
+        vcf = TEST_SEQUENCES,
+        candidates = "data/candidates.csv"
     params:
         frequencies = FREQUENCIES,
         trials = 100
