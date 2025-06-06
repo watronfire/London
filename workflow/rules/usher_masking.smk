@@ -60,7 +60,22 @@ rule run_vibecheck_usher_masked:
         """
 
 
-rule combine_results:
+rule mask_variants_usher:
+    input:
+        sequences = TEST_SEQUENCES,
+        canidates = "data/candidates.csv"
+    params:
+        frequencies = FREQUENCIES,
+        trials = 100
+    output:
+        masked_variants = "results/usher-variant-masking.csv"
+    log:
+        notebook = "results/notebooks/mask-variants-usher.ipynb"
+    threads: 16
+    notebook: "../notebooks/mask-variants-usher.py.ipynb"
+
+
+rule combine_usher_results:
     input:
         usher = expand( "intermediates/usher_masked/{sample}_{freq}/{sample}_{freq}.csv", sample=CANDIDATES, freq=FREQUENCIES )
     output:
@@ -83,6 +98,7 @@ rule combine_results:
         results = pd.concat( results, ignore_index=True )
         results.to_csv( output.results, index=False )
 
+
 rule plot_masking_results:
     input:
         results = rules.combine_results.output.results
@@ -92,3 +108,4 @@ rule plot_masking_results:
     log:
         notebook = "results/notebooks/plot_usher_masking.ipynb"
     notebook: "../notebooks/plot_usher_masking.py.ipynb"
+
