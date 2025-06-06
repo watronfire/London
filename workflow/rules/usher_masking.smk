@@ -91,4 +91,4 @@ rule plot_masking_results:
         parsimony_plot = "results/plots/parsimony-vs-masking.pdf"
     log:
         notebook = "results/notebooks/plot_usher_masking.ipynb"
-    notebook: "workflow/notebooks/plot_usher_masking.py.ipynb"
+    notebook: "../../notebooks/plot_usher_masking.py.ipynb"
