@@ -9,7 +9,10 @@ rule all:
         accuracy_lineage_calls = "intermediates/accuracy_runs/lineage_report.csv",
         accuracy_plot= "results/plots/accuracy-confusion-matrix.pdf",
         parsimony_plot= "results/plots/parsimoneous-placements.pdf",
-        masking_results = "results/usher-masking.csv"
+        masking_results = "results/usher-masking.csv",
+        accuracy_masking_plot= "results/plots/accuracy-vs-masking.pdf",
+        parsimony_masking_plot= "results/plots/parsimony-vs-masking.pdf"
+        #freyja_masking = "results/freyja_masking.csv"
 
 include: "rules/benchmarks.smk"
 include: "rules/usher_masking.smk"

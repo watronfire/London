@@ -83,3 +83,12 @@ rule combine_results:
         results = pd.concat( results, ignore_index=True )
         results.to_csv( output.results, index=False )
 
+rule plot_masking_results:
+    input:
+        results = rules.combine_results.output.combined_results
+    output:
+        accuracy_plot = "results/plots/accuracy-vs-masking.pdf",
+        parsimony_plot = "results/plots/parsimony-vs-masking.pdf"
+    log:
+        notebook = "results/notebooks/plot_usher_masking.ipynb"
+    notebook: "workflow/notebooks/plot_usher_masking.py.ipynb"
