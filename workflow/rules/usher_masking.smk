@@ -75,6 +75,17 @@ rule mask_variants_usher:
     notebook: "../notebooks/mask-variants-usher.py.ipynb"
 
 
+rule plot_masking_variants_usher:
+    input:
+        results = rules.mask_variants_usher.output.results
+    output:
+        accuracy_plot = "results/plots/usher-masking-variants-accuracy.pdf",
+        parsimony_plot = "results/plots/usher-masking-variants-parsimony.pdf"
+    log:
+        notebook = "results/notebooks/plot_usher_variant_masking.ipynb"
+    notebook: "../notebooks/plot_usher_variant_masking.py.ipynb"
+
+
 rule combine_usher_results:
     input:
         usher = expand( "intermediates/usher_masked/{sample}_{freq}/{sample}_{freq}.csv", sample=CANDIDATES, freq=FREQUENCIES )
