@@ -134,7 +134,7 @@ rule parse_results:
 
 rule combine_freyja_results:
     input:
-        results = expand( "intermediates/parsed_freyja/{sample}.{reads}.{trial}.csv", sample=SAMPLES, reads=[100, 1000, 10000, 100000, 1000000], trial=range(1,101 ) )
+        results = expand( "intermediates/parsed_freyja/{sample}.{reads}.{trial}.csv", sample=SAMPLES, reads=[100, 1000, 10000, 100000, 1000000], trial=range(1,11 ) )
     output:
         combined_results = "results/freyja_masking.csv"
     run:
