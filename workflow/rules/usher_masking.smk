@@ -66,7 +66,7 @@ rule mask_variants_usher:
         candidates = "data/candidates.csv"
     params:
         frequencies = FREQUENCIES,
-        trials = 100
+        trials = 10
     output:
         masked_variants = "results/usher-variant-masking.csv"
     log:
