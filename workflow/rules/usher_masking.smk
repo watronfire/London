@@ -68,7 +68,7 @@ rule mask_variants_usher:
         frequencies = FREQUENCIES,
         trials = 10
     output:
-        masked_variants = "results/usher-variant-masking.csv"
+        results = "results/usher-variant-masking.csv"
     log:
         notebook = "results/notebooks/mask-variants-usher.ipynb"
     threads: 16
