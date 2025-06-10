@@ -178,7 +178,7 @@ rule combine_freyja_benchmarks:
         bm.to_csv( output.benchmarks, index=False )
 
 
-rule plot_freyja_results:
+rule plot_freyja_benchmarks:
     input:
         results = rules.combine_freyja_results.output.combined_results
     output:
@@ -186,6 +186,7 @@ rule plot_freyja_results:
     log:
         notebook = "results/notebooks/plot_freyja_benchmarks.ipynb"
     notebook: "../notebooks/plot_freyja_benchmarks.py.ipynb"
+
 
 rule plot_freyja_results:
     input:
