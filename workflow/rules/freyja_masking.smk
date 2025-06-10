@@ -159,11 +159,33 @@ rule combine_freyja_benchmarks:
         100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) )
     output:
         benchmarks = "results/freyja_benchmarks.csv"
-    shell:
-        """
-        cat {input.subsamples_reads} {input.call_variants} {input.freyja_demix} {input.parse_results} > {output.benchmarks} 
-        """
+    run:
+        import pandas as pd
+        from pathlib import Path
 
+        bm = list()
+        for step in [input.subsamples_reads, input.call_variants, input.freyja_demix, input.parse_results]:
+            for file in step:
+                path = Path(file)
+                df = pd.read_csv( path, sep="\t" )
+                df["file"] = path.name
+                df["step"] = path.parent.name
+                bm.append( df )
+        bm = pd.concat( bm, ignore_index=True )
+        bm[["reads", "trial"]] = bm["file"].str.extract( r"CHS3677.(\d+).(\d+).txt" )
+        for col in ["reads", "trial"]:
+            bm[col] = pd.to_numeric( bm[col] )
+        bm.to_csv( output.benchmarks, index=False )
+
+
+rule plot_freyja_results:
+    input:
+        results = rules.combine_freyja_results.output.combined_results
+    output:
+        benchmark_plots = "results/plots/freyja_benchmarks.pdf"
+    log:
+        notebook = "results/notebooks/plot_freyja_benchmarks.ipynb"
+    notebook: "../notebooks/plot_freyja_benchmarks.py.ipynb"
 
 rule plot_freyja_results:
     input:
