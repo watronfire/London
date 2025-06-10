@@ -151,11 +151,11 @@ rule combine_freyja_benchmarks:
     input:
         subsamples_reads = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt", sample=SAMPLES, reads=[
         100, 1000, 10000, 100000, 1000000], trial=range(1,11 ) ),
-        call_variants = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
+        call_variants = expand( "intermediates/benchmarks/call_variants/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
         100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) ),
-        freyja_demix = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
+        freyja_demix = expand( "intermediates/benchmarks/freyja_demix/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
         100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) ),
-        parse_results = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
+        parse_results = expand( "intermediates/benchmarks/parse_results/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
         100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) )
     output:
         benchmarks = "results/freyja_benchmarks.csv"
