@@ -31,6 +31,7 @@ rule subsample_reads:
     output:
         sampled_alignment = temp( "intermediates/subsamples/{sample}.{reads}.{trial}.bam" )
     threads: 4
+    benchmark: "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt"
     shell:
         """
         cat <(samtools view -H {input.alignment}) <(samtools view {input.alignment} | shuf -n {params.reads}) |\
@@ -59,6 +60,7 @@ rule call_variants:
         variants = temp( "intermediates/variants/{sample}.{reads}.{trial}.vcf" ),
         variants_filled = "intermediates/variants/{sample}.{reads}.{trial}_filled.vcf"
     threads: 4
+    benchmark: "intermediates/benchmarks/call_variants/{sample}.{reads}.{trial}.txt"
     shell:
         """
         bcftools mpileup --count-orphans --threads {threads} -d 600000 -Q 20 -q 0 -B -a INFO/AD,INFO/ADF,INFO/ADR -Ou -f {input.reference} {input.alignment} |\
@@ -73,6 +75,7 @@ rule freyja_demix:
         barcodes = BARCODES
     output:
         results = temp( "intermediates/freyja/{sample}.{reads}.{trial}.txt" )
+    benchmark: "intermediates/benchmarks/freyja_demix/{sample}.{reads}.{trial}.txt"
     shell:
         """
         freyja demix {input.variants} {input.depth} --output {output.results} --barcodes {input.barcodes} ||\
@@ -85,6 +88,7 @@ rule parse_results:
         depths = rules.calculate_depth.output.depth
     output:
         parsed_results = "intermediates/parsed_freyja/{sample}.{reads}.{trial}.csv"
+    benchmark: "intermediates/benchmarks/parse_results/{sample}.{reads}.{trial}.txt"
     run:
         import numpy as np
 
@@ -142,3 +146,30 @@ rule combine_freyja_results:
         df = pd.concat( [pd.read_csv(f) for f in input.results], ignore_index=True )
         df.to_csv( output.combined_results, index=False )
 
+
+rule combine_freyja_benchmarks:
+    input:
+        subsamples_reads = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt", sample=SAMPLES, reads=[
+        100, 1000, 10000, 100000, 1000000], trial=range(1,11 ) ),
+        call_variants = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
+        100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) ),
+        freyja_demix = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
+        100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) ),
+        parse_results = expand( "intermediates/benchmarks/subsample_reads/{sample}.{reads}.{trial}.txt",sample=SAMPLES,reads=[
+        100, 1000, 10000, 100000, 1000000],trial=range( 1,11 ) )
+    output:
+        benchmarks = "results/freyja_benchmarks.csv"
+    shell:
+        """
+        cat {input.subsamples_reads} {input.call_variants} {input.freyja_demix} {input.parse_results} > {output.benchmarks} 
+        """
+
+
+rule plot_freyja_results:
+    input:
+        results = rules.combine_freyja_results.output.combined_results
+    output:
+        accuracy_coverage_plot = "results/plots/accuracy-coverage-vs-reads.pdf"
+    log:
+        notebook = "results/notebooks/plot_freyja_masking.ipynb"
+    notebook: "../notebooks/plot_freyja_masking.py.ipynb"
