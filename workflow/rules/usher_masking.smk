@@ -115,6 +115,7 @@ rule plot_masking_results:
         results = rules.combine_usher_results.output.results
     output:
         accuracy_plot = "results/plots/accuracy-vs-masking.pdf",
+        accuracy_lineage_plot = "results/plots/accuracy-vs-masking-per-lineage.pdf",
         parsimony_plot = "results/plots/parsimony-vs-masking.pdf"
     log:
         notebook = "results/notebooks/plot_usher_masking.ipynb"
