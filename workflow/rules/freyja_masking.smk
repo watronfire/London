@@ -180,7 +180,7 @@ rule combine_freyja_benchmarks:
 
 rule plot_freyja_benchmarks:
     input:
-        results = rules.combine_freyja_results.output.combined_results
+        results = rules.combine_freyja_benchmarks.output.benchmarks
     output:
         benchmark_plots = "results/plots/freyja_benchmarks.pdf"
     log:
