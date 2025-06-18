@@ -18,8 +18,10 @@ rule all:
         freyja_masking = "results/freyja_masking.csv",
         accuracy_coverage_plot= "results/plots/accuracy-coverage-vs-reads.pdf",
         freyja_benchmarks= "results/freyja_benchmarks.csv",
-        benchmark_plots = "results/plots/freyja_benchmarks.pdf"
+        benchmark_plots = "results/plots/freyja_benchmarks.pdf",
+        #barcodes_plots = "results/plots/barcode_plots.pdf"
 
 include: "rules/benchmarks.smk"
 include: "rules/usher_masking.smk"
 include: "rules/freyja_masking.smk"
+include: "rules/assorted.smk"

@@ -66,6 +66,7 @@ rule combine_speed_benchmark:
         import pandas as pd
         import numpy as np
         import matplotlib.pyplot as plt
+        from scipy.optimize import curve_fit
 
         res = list()
         for file in input.benchmarks:
@@ -80,32 +81,46 @@ rule combine_speed_benchmark:
         res = res.drop( columns=["file"] )
         res.to_csv( output.benchmark_summary, index=False )
 
-        fig, ax = plt.subplots( dpi=200,figsize=(12, 3.5),ncols=3, sharex=True )
 
-        jitter = (np.random.random( len( res ) ) * 4) - 2
-        points = ax[0].scatter( res["sequences"] + jitter,res["cpu_time"],s=10,zorder=100,c="#009E73" )
+        def basic_exp( x, a, b ):
+            return a * np.power( x,b )
+
+
+        fig, ax = plt.subplots( dpi=200,figsize=(12, 3.5),ncols=3 )
+
+        fit, _ = curve_fit( basic_exp,xdata=res["sequences"],ydata=res["cpu_time"] )
+        xs = np.linspace( 1,103,100 )
+        ys = [basic_exp( x,*fit ) for x in xs]
+
+        points = ax[0].scatter( res["sequences"],res["cpu_time"],s=10,zorder=100,c="#009E73" )
         points.set_clip_on( False )
+        ax[0].plot( xs,ys,color="black",linewidth=1,linestyle="--",zorder=50 )
         ax[0].set_ylim( 0 )
         ax[0].set_xlim( -3,103 )
         ax[0].set_xlabel( "Sequences",fontweight="bold" )
         ax[0].set_ylabel( "CPU time (seconds)",fontweight="bold" )
         ax[0].grid( color="#EFEFEF" )
 
-        points = ax[1].scatter(
-            res["sequences"] + jitter,res["cpu_time"] / res["sequences"],s=10,zorder=100,c="#009E73"
-            )
+        fit2, _ = curve_fit( basic_exp,xdata=res["sequences"],ydata=res["cpu_time"] / res["sequences"] )
+        ys2 = [basic_exp( x,*fit2 ) for x in xs]
+        points = ax[1].scatter( res["sequences"],res["cpu_time"] / res["sequences"],s=10,zorder=100,c="#009E73" )
         points.set_clip_on( False )
-
+        ax[1].plot( xs,ys2,color="black",linewidth=1,linestyle="--",zorder=50 )
         ax[1].set_ylim( 0 )
+        ax[1].set_xlim( -3,103 )
         ax[1].set_xlabel( "Sequences",fontweight="bold" )
         ax[1].set_ylabel( "CPU time per sequence (seconds)",fontweight="bold" )
 
         ax[1].grid( color="#EFEFEF" )
 
-        points = ax[2].scatter( res["sequences"] + jitter,res["max_rss"],s=10,zorder=100,c="#009E73" )
-        points.set_clip_on( False )
+        fit3, _ = curve_fit( basic_exp,xdata=res["sequences"],ydata=res["max_rss"] )
+        ys3 = [basic_exp( x,*fit3 ) for x in xs]
 
+        points = ax[2].scatter( res["sequences"],res["max_rss"],s=10,zorder=100,c="#009E73" )
+        points.set_clip_on( False )
+        ax[2].plot( xs,ys3,color="black",linewidth=1,linestyle="--",zorder=50 )
         ax[2].set_ylim( 0 )
+        ax[2].set_xlim( -3,103 )
         ax[2].set_xlabel( "Sequences",fontweight="bold" )
         ax[2].set_ylabel( "Max memory (MB)",fontweight="bold" )
 
