@@ -1,7 +1,7 @@
 LINEAGE_CALLS = "data/test.lineages.tsv"
 TEST_SEQUENCES = "data/test.sequences.vcf"
 REFERENCE = "data/cholera_reference.fasta"
-TERRA_RESULTS = "results/taxon_results.tsv"
+TERRA_RESULTS = "data/taxon_results.tsv"
 
 rule prepare_VCF:
     input:
