@@ -286,7 +286,7 @@ rule plot_classification_stats:
 
 rule plot_freyja_accuracy:
     input:
-        terra_result = TERRA_RESULTS
+        terra_results = TERRA_RESULTS
     output:
         accuracy_plot = "results/plots/freyja-accuracy-confusion-matrix.pdf"
     log:
