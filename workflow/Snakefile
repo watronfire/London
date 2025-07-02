@@ -15,6 +15,7 @@ rule all:
         variant_masking_results = "results/usher-variant-masking.csv",
         variant_accuracy_plot= "results/plots/usher-masking-variants-accuracy.pdf",
         variant_parsimony_plot= "results/plots/usher-masking-variants-parsimony.pdf",
+        freyja_accuracy_plot = "results/plots/freyja-accuracy-confusion-matrix.pdf",
         freyja_masking = "results/freyja_masking.csv",
         accuracy_coverage_plot= "results/plots/accuracy-coverage-vs-reads.pdf",
         freyja_benchmarks= "results/freyja_benchmarks.csv",

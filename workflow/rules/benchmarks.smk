@@ -1,6 +1,7 @@
 LINEAGE_CALLS = "data/test.lineages.tsv"
 TEST_SEQUENCES = "data/test.sequences.vcf"
 REFERENCE = "data/cholera_reference.fasta"
+TERRA_RESULTS = "results/taxon_results.tsv"
 
 rule prepare_VCF:
     input:
@@ -143,6 +144,7 @@ rule classify_all_sequences:
         vibecheck --threads {threads} --outdir {params.outdir} {input.sequences}
         """
 
+
 rule plot_classification_stats:
     input:
         lineage_calls = rules.classify_all_sequences.output.lineage_call,
@@ -192,7 +194,7 @@ rule plot_classification_stats:
 
         accuracy_sum = accuracy_sum.sort_values( by="numeric_lineage" ).reset_index( drop=True )
 
-        confusion_matrix = res.pivot_table( index="lineage_actual",columns="lineage",values="correct",aggfunc="count",fill_value=0 )
+        confusion_matrix = res.pivot_table( columns="lineage_actual",index="lineage",values="correct",aggfunc="count",fill_value=0 )
         confusion_matrix = confusion_matrix.reindex(
             columns=accuracy_sum["lineage_actual"],index=accuracy_sum["lineage_actual"]
         )
@@ -253,8 +255,8 @@ rule plot_classification_stats:
         ax[1].grid( which="minor",color="white",linewidth=1,zorder=100 )
         ax[1].tick_params( axis="both",which="minor",size=0 )
 
-        ax[1].set_xlabel( "Assigned lineage",fontweight="bold" )
-        ax[1].set_ylabel( "Actual lineage",fontweight="bold" )
+        ax[1].set_xlabel( "Actual lineage",fontweight="bold" )
+        ax[1].set_ylabel( "Assigned lineage",fontweight="bold" )
 
         plt.tight_layout()
         plt.savefig( output.accuracy_plot )
@@ -280,3 +282,13 @@ rule plot_classification_stats:
 
         plt.tight_layout()
         plt.savefig( output.parsimony_plot )
+
+
+rule plot_freyja_accuracy:
+    input:
+        terra_result = TERRA_RESULTS
+    output:
+        accuracy_plot = "results/plots/freyja-accuracy-confusion-matrix.pdf"
+    log:
+        notebook = "results/notebooks/freyja-accuracy.ipynb"
+    notebook: "../notebooks/plot_freyja_accuracy.py.ipynb"
