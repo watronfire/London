@@ -4,7 +4,7 @@ REFERENCE = "/PHShome/nm104/scripts/vibecheck/vibecheck/resources/reference.fast
 BARCODES = "/PHShome/nm104/analysis/London/data/freyja-test/usher_barcodes.feather"
 candidates = "data/candidates_freyja.csv"
 samples = pd.read_csv( candidates, usecols=["taxon_id","read1", "read2"] )
-SAMPLES = samples.set_index( "taxon_id" )[["read1","read2"]].to_dict()
+SAMPLES = samples.set_index( "taxon_id" )[["read1","read2"]].to_dict( orient="index" )
 
 rule download_reads:
     output:
