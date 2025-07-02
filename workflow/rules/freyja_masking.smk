@@ -14,6 +14,8 @@ rule download_reads:
         read1_loc = lambda wildcards: SAMPLES[wildcards.sample]["read1"],
         read2_loc = lambda wildcards: SAMPLES[wildcards.sample]["read2"],
     group: "prepare_files"
+    envmodules:
+        "gcloud"
     shell:
         """
         gsutil cp {params.read1_loc} {output.read1} &&\
