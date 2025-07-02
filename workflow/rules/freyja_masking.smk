@@ -1,19 +1,35 @@
+import pandas as pd
 
 REFERENCE = "/PHShome/nm104/scripts/vibecheck/vibecheck/resources/reference.fasta"
-BARCODES = "/PHShome/nm104/scripts/vibecheck/vibecheck/resources/o1_barcodes.feather"
-READ1 = "/data/wohllab/2025.01.28_class/input/CHS3677_R1.fastq.gz"
-READ2 = "/data/wohllab/2025.01.28_class/input/CHS3677_R1.fastq.gz"
-SAMPLES = {"CHS3677" : [READ1, READ2]}
+BARCODES = "/PHShome/nm104/analysis/London/data/freyja-test/usher_barcodes.feather"
+candidates = "data/candidates_freyja.csv"
+samples = pd.read_csv( candidates, usecols=["taxon_id","read1", "read2"] )
+SAMPLES = samples.set_index( "taxon_id" )[["read1","read2"]].to_dict()
+
+rule download_reads:
+    output:
+        read1 = temp( "/data/wohllab/2025.06.23_vc/input/{sample}_R1.fastq.gz" ),
+        read2= temp("/data/wohllab/2025.06.23_vc/input/{sample}_R2.fastq.gz")
+    params:
+        read1_loc = lambda wildcards: SAMPLES[wildcards.sample]["read1"],
+        read2_loc = lambda wildcards: SAMPLES[wildcards.sample]["read2"],
+    group: "prepare_files"
+    shell:
+        """
+        gsutil cp {params.read1_loc} {output.read1} &&\
+        gsutil cp {params.read2_loc} {output.read2} 
+        """
 
 rule align_reads:
     input:
-        read1 = lambda wildcards: SAMPLES[wildcards.sample][0],
-        read2 = lambda wildcards: SAMPLES[wildcards.sample][1],
+        read1 = rules.download_reads.output.read1,
+        read2 = rules.download_reads.output.read2,
         reference = REFERENCE
     output:
-        alignment = "intermediates/alignments/{sample}.sorted-filtered.bam",
-        alignment_index = "intermediates/alignments/{sample}.sorted-filtered.bam.bai"
+        alignment = temp( "intermediates/alignments/{sample}.sorted-filtered.bam" ),
+        alignment_index = temp( "intermediates/alignments/{sample}.sorted-filtered.bam.bai" )
     threads: 8
+    group: "prepare_files"
     shell:
         """
         minimap2 -ax sr -t {threads} {input.reference} {input.read1} {input.read2} |\
@@ -76,6 +92,7 @@ rule freyja_demix:
     output:
         results = temp( "intermediates/freyja/{sample}.{reads}.{trial}.txt" )
     benchmark: "intermediates/benchmarks/freyja_demix/{sample}.{reads}.{trial}.txt"
+    group: "freyja_analysis"
     shell:
         """
         freyja demix {input.variants} {input.depth} --output {output.results} --barcodes {input.barcodes} ||\
@@ -89,6 +106,7 @@ rule parse_results:
     output:
         parsed_results = "intermediates/parsed_freyja/{sample}.{reads}.{trial}.csv"
     benchmark: "intermediates/benchmarks/parse_results/{sample}.{reads}.{trial}.txt"
+    group: "freyja_analysis"
     run:
         import numpy as np
 
