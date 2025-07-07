@@ -192,7 +192,7 @@ rule combine_freyja_benchmarks:
                 df["step"] = path.parent.name
                 bm.append( df )
         bm = pd.concat( bm, ignore_index=True )
-        bm[["reads", "trial"]] = bm["file"].str.extract( r"CHS3677.(\d+).(\d+).txt" )
+        bm[["sample", "reads", "trial"]] = bm["file"].str.extract( r"(VB\d+).(\d+).(\d+).txt" )
         for col in ["reads", "trial"]:
             bm[col] = pd.to_numeric( bm[col] )
         bm.to_csv( output.benchmarks, index=False )
@@ -210,6 +210,7 @@ rule plot_freyja_benchmarks:
 
 rule plot_freyja_results:
     input:
+        lineage_calls = candidates,
         results = rules.combine_freyja_results.output.combined_results
     output:
         accuracy_coverage_plot = "results/plots/accuracy-coverage-vs-reads.pdf"
